@@ -1,27 +1,107 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Light Mode — Notion 스타일 */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --surface: 40 14% 97%;
+    --surface-hover: 40 10% 94%;
+    --border: 40 8% 91%;
+    --text-primary: 0 0% 10%;
+    --text-secondary: 0 0% 42%;
+    --text-muted: 0 0% 61%;
+    --accent: 211 80% 51%;
+    --accent-hover: 211 80% 44%;
+    --success: 145 82% 33%;
+    --warning: 43 100% 48%;
+    --danger: 4 72% 51%;
+    --radius: 0.375rem;
   }
+
+  .dark {
+    --background: 0 0% 9.8%;
+    --foreground: 0 0% 90%;
+    --surface: 0 0% 12.9%;
+    --surface-hover: 0 0% 16%;
+    --border: 0 0% 17.6%;
+    --text-primary: 0 0% 90%;
+    --text-secondary: 0 0% 61%;
+    --text-muted: 0 0% 50%;
+    --accent: 211 90% 64%;
+    --accent-hover: 211 85% 58%;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--text-muted)); }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .notion-card {
+    background-color: hsl(var(--surface));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 1rem;
+    transition: background-color 0.15s;
+  }
+  .notion-card:hover {
+    background-color: hsl(var(--surface-hover));
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    color: hsl(var(--text-secondary));
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sidebar-item:hover {
+    background-color: hsl(var(--surface-hover));
+    color: hsl(var(--text-primary));
+  }
+  .sidebar-item.active {
+    background-color: hsl(var(--surface-hover));
+    color: hsl(var(--text-primary));
+    font-weight: 500;
+  }
+
+  .kanban-card {
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+  .kanban-card:hover {
+    border-color: hsl(var(--accent) / 0.5);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
 }
