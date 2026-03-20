@@ -1,16 +1,16 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { login } from './actions'
+import { register } from './actions'
 import { AuthForm } from '@/components/auth/auth-form'
 
 export const metadata: Metadata = {
-  title: '로그인',
+  title: '회원가입',
 }
 
-export default function LoginPage({
+export default function RegisterPage({
   searchParams,
 }: {
-  searchParams: { message?: string; error?: string }
+  searchParams: { error?: string }
 }) {
   return (
     <div
@@ -30,23 +30,9 @@ export default function LoginPage({
             ProjectFlow
           </h1>
           <p className="text-sm" style={{ color: 'hsl(var(--text-secondary))' }}>
-            계정에 로그인하세요
+            무료 계정을 만드세요
           </p>
         </div>
-
-        {/* 알림 메시지 */}
-        {searchParams.message && (
-          <div
-            className="text-sm text-center px-4 py-2 rounded-md"
-            style={{
-              backgroundColor: 'hsl(145 82% 33% / 0.1)',
-              color: 'hsl(145 82% 33%)',
-              border: '1px solid hsl(145 82% 33% / 0.2)',
-            }}
-          >
-            {searchParams.message}
-          </div>
-        )}
 
         {/* 에러 메시지 */}
         {searchParams.error && (
@@ -62,22 +48,22 @@ export default function LoginPage({
           </div>
         )}
 
-        {/* 로그인 폼 */}
+        {/* 회원가입 폼 */}
         <AuthForm
-          mode="login"
-          action={login}
-          submitLabel="로그인"
+          mode="register"
+          action={register}
+          submitLabel="회원가입"
         />
 
         {/* 링크 */}
         <p className="text-center text-sm" style={{ color: 'hsl(var(--text-secondary))' }}>
-          아직 계정이 없으신가요?{' '}
+          이미 계정이 있으신가요?{' '}
           <Link
-            href="/register"
+            href="/login"
             className="font-medium hover:underline"
             style={{ color: 'hsl(var(--accent))' }}
           >
-            회원가입
+            로그인
           </Link>
         </p>
       </div>

@@ -1,3 +1,6 @@
+'use client'
+
+import { useState } from 'react'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Topbar } from '@/components/layout/topbar'
 import { ThemeProvider } from '@/components/layout/theme-provider'
@@ -7,25 +10,27 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
       <div className="flex h-screen overflow-hidden" style={{ backgroundColor: 'hsl(var(--background))' }}>
         {/* 사이드바 */}
-        <Sidebar />
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
         {/* 메인 영역 */}
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           {/* 상단 바 */}
-          <Topbar />
+          <Topbar onMenuClick={() => setSidebarOpen(true)} />
 
           {/* 컨텐츠 + 광고 */}
           <div className="flex flex-1 overflow-hidden">
             {/* 메인 컨텐츠 */}
-            <main className="flex-1 overflow-y-auto p-6">
+            <main className="flex-1 overflow-y-auto p-4 md:p-6">
               {children}
             </main>
 
-            {/* AdSense 우측 사이드 — 데스크탑 전용 */}
+            {/* AdSense 우측 사이드 — 데스크탑 xl 전용 */}
             <aside
               className="hidden xl:flex flex-col gap-4 p-4 border-l shrink-0"
               style={{
@@ -34,7 +39,6 @@ export default function DashboardLayout({
                 backgroundColor: 'hsl(var(--surface))',
               }}
             >
-              {/* AdSense 광고 영역 */}
               <div
                 className="rounded-md flex items-center justify-center text-xs"
                 style={{

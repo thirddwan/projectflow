@@ -1,16 +1,16 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { login } from './actions'
+import { forgotPassword } from './actions'
 import { AuthForm } from '@/components/auth/auth-form'
 
 export const metadata: Metadata = {
-  title: '로그인',
+  title: '비밀번호 찾기',
 }
 
-export default function LoginPage({
+export default function ForgotPasswordPage({
   searchParams,
 }: {
-  searchParams: { message?: string; error?: string }
+  searchParams: { error?: string }
 }) {
   return (
     <div
@@ -27,28 +27,14 @@ export default function LoginPage({
             <span className="text-white text-xl font-bold">PF</span>
           </div>
           <h1 className="text-2xl font-bold" style={{ color: 'hsl(var(--text-primary))' }}>
-            ProjectFlow
+            비밀번호 찾기
           </h1>
           <p className="text-sm" style={{ color: 'hsl(var(--text-secondary))' }}>
-            계정에 로그인하세요
+            가입 시 사용한 이메일을 입력하시면<br />재설정 링크를 보내드립니다.
           </p>
         </div>
 
-        {/* 알림 메시지 */}
-        {searchParams.message && (
-          <div
-            className="text-sm text-center px-4 py-2 rounded-md"
-            style={{
-              backgroundColor: 'hsl(145 82% 33% / 0.1)',
-              color: 'hsl(145 82% 33%)',
-              border: '1px solid hsl(145 82% 33% / 0.2)',
-            }}
-          >
-            {searchParams.message}
-          </div>
-        )}
-
-        {/* 에러 메시지 */}
+        {/* 에러 */}
         {searchParams.error && (
           <div
             className="text-sm text-center px-4 py-2 rounded-md"
@@ -62,22 +48,21 @@ export default function LoginPage({
           </div>
         )}
 
-        {/* 로그인 폼 */}
+        {/* 폼 */}
         <AuthForm
-          mode="login"
-          action={login}
-          submitLabel="로그인"
+          mode="forgot-password"
+          action={forgotPassword}
+          submitLabel="재설정 링크 보내기"
         />
 
-        {/* 링크 */}
+        {/* 뒤로 */}
         <p className="text-center text-sm" style={{ color: 'hsl(var(--text-secondary))' }}>
-          아직 계정이 없으신가요?{' '}
           <Link
-            href="/register"
+            href="/login"
             className="font-medium hover:underline"
             style={{ color: 'hsl(var(--accent))' }}
           >
-            회원가입
+            ← 로그인으로 돌아가기
           </Link>
         </p>
       </div>
