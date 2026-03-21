@@ -40,16 +40,16 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   return (
     <div className="space-y-6 max-w-5xl">
       {/* 헤더 */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold"
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0"
             style={{ backgroundColor: color }}
           >
             {project.name.charAt(0).toUpperCase()}
           </div>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'hsl(var(--text-primary))' }}>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold truncate" style={{ color: 'hsl(var(--text-primary))' }}>
               {project.name}
             </h1>
             {project.description && (

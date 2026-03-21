@@ -85,7 +85,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span
-                  className="text-xs px-2 py-0.5 rounded-full"
+                  className="hidden xs:inline-flex text-xs px-2 py-0.5 rounded-full"
                   style={{
                     backgroundColor: task.status === '진행 중' ? 'hsl(211 80% 51% / 0.1)' : 'hsl(var(--surface-hover))',
                     color: task.status === '진행 중' ? 'hsl(var(--accent))' : 'hsl(var(--text-secondary))',
@@ -93,7 +93,7 @@ export default function DashboardPage() {
                 >
                   {task.status}
                 </span>
-                <span className="text-xs" style={{ color: 'hsl(var(--text-muted))' }}>
+                <span className="hidden sm:block text-xs" style={{ color: 'hsl(var(--text-muted))' }}>
                   ~{task.due}
                 </span>
               </div>
@@ -115,17 +115,17 @@ export default function DashboardPage() {
             { phase: 'Phase 4', title: '최적화 — 성능·SEO·배포', period: '5/30 ~ 6/12', progress: 0, status: '예정', color: '#9B9B9B' },
           ].map((item) => (
             <div key={item.phase} className="flex items-center gap-4">
-              <div className="w-20 shrink-0">
+              <div className="w-16 sm:w-20 shrink-0">
                 <span className="text-xs font-medium" style={{ color: item.color }}>
                   {item.phase}
                 </span>
               </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs" style={{ color: 'hsl(var(--text-secondary))' }}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1 gap-2">
+                  <span className="text-xs truncate" style={{ color: 'hsl(var(--text-secondary))' }}>
                     {item.title}
                   </span>
-                  <span className="text-xs" style={{ color: 'hsl(var(--text-muted))' }}>
+                  <span className="hidden sm:block text-xs shrink-0" style={{ color: 'hsl(var(--text-muted))' }}>
                     {item.period}
                   </span>
                 </div>

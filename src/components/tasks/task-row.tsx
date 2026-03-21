@@ -47,21 +47,21 @@ export function TaskRow({ task, isLast }: TaskRowProps) {
       </p>
 
       {/* 메타 */}
-      <div className="flex items-center gap-3 shrink-0 text-xs" style={{ color: 'hsl(var(--text-muted))' }}>
+      <div className="flex items-center gap-2 shrink-0 text-xs" style={{ color: 'hsl(var(--text-muted))' }}>
         {task.assignee && (
-          <span className="flex items-center gap-1">
+          <span className="hidden sm:flex items-center gap-1">
             <User size={12} />
             {task.assignee.name}
           </span>
         )}
         {task.due_date && (
-          <span className="flex items-center gap-1">
+          <span className="hidden sm:flex items-center gap-1">
             <Calendar size={12} />
             {new Date(task.due_date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
           </span>
         )}
         <span
-          className="px-2 py-0.5 rounded-full text-xs"
+          className="hidden xs:inline-flex px-2 py-0.5 rounded-full text-xs"
           style={{
             backgroundColor: 'hsl(var(--surface-hover))',
             color: 'hsl(var(--text-secondary))',

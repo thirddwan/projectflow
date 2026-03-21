@@ -52,6 +52,18 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 9999px; }
   ::-webkit-scrollbar-thumb:hover { background: hsl(var(--text-muted)); }
+
+  /* 터치 디바이스: 탭 지연 제거 */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* 모바일: 입력 필드 확대 방지 */
+  @media (max-width: 640px) {
+    input, textarea, select {
+      font-size: 16px;
+    }
+  }
 }
 
 @layer components {
