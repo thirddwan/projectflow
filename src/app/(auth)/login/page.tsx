@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { message?: string; error?: string }
+  searchParams: { message?: string; error?: string; redirect?: string }
 }) {
   return (
     <div
@@ -67,6 +67,7 @@ export default function LoginPage({
           mode="login"
           action={login}
           submitLabel="로그인"
+          redirectTo={searchParams.redirect}
         />
 
         {/* 링크 */}

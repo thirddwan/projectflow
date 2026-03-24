@@ -1,11 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
-import { LayoutGrid, Settings, Plus } from 'lucide-react'
+import { LayoutGrid, GanttChart, Settings, Plus } from 'lucide-react'
 import { getProject } from '../actions'
 import { getTasksByProject } from '@/app/(dashboard)/tasks/actions'
 import { TaskRow } from '@/components/tasks/task-row'
 import { DeleteProjectButton } from '@/components/projects/delete-project-button'
+
+// useSearchParams 사용 컴포넌트 — SSR 비활성화로 hydration 충돌 방지
+const TaskFilter = dynamic(
+  () => import('@/components/tasks/task-filter').then((m) => ({ default: m.TaskFilter })),
+  { ssr: false }
+)
 
 const COLOR_MAP: Record<string, string> = {
   blue: '#2383E2', purple: '#9333EA', green: '#16A34A',
@@ -17,8 +24,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   return { title: project?.name ?? '프로젝트' }
 }
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const [project, tasks] = await Promise.all([
+export default async function ProjectDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string }
+  searchParams: { status?: string; priority?: string; search?: string }
+}) {
+  const [project, allTasks] = await Promise.all([
     getProject(params.id),
     getTasksByProject(params.id),
   ])
@@ -27,11 +40,22 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
   const color = COLOR_MAP[project.color] ?? COLOR_MAP.blue
 
+  // 필터 적용
+  const tasks = allTasks.filter((t) => {
+    if (searchParams.status && t.status !== searchParams.status) return false
+    if (searchParams.priority && t.priority !== searchParams.priority) return false
+    if (searchParams.search) {
+      const q = searchParams.search.toLowerCase()
+      if (!t.title.toLowerCase().includes(q)) return false
+    }
+    return true
+  })
+
   const taskStats = {
-    total: tasks.length,
-    done: tasks.filter((t) => t.status === 'done').length,
-    inProgress: tasks.filter((t) => t.status === 'in_progress').length,
-    backlog: tasks.filter((t) => t.status === 'backlog').length,
+    total: allTasks.length,
+    done: allTasks.filter((t) => t.status === 'done').length,
+    inProgress: allTasks.filter((t) => t.status === 'in_progress').length,
+    backlog: allTasks.filter((t) => t.status === 'backlog').length,
   }
   const progressPct = taskStats.total > 0
     ? Math.round((taskStats.done / taskStats.total) * 100)
@@ -61,23 +85,25 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Link
+            href={`/projects/${project.id}/timeline`}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium"
+            style={{ border: '1px solid hsl(var(--border))', color: 'hsl(var(--text-secondary))' }}
+          >
+            <GanttChart size={15} />
+            타임라인
+          </Link>
+          <Link
             href={`/projects/${project.id}/kanban`}
             className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium"
-            style={{
-              border: '1px solid hsl(var(--border))',
-              color: 'hsl(var(--text-secondary))',
-            }}
+            style={{ border: '1px solid hsl(var(--border))', color: 'hsl(var(--text-secondary))' }}
           >
             <LayoutGrid size={15} />
-            칸반 보드
+            칸반
           </Link>
           <Link
             href={`/projects/${project.id}/settings`}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm"
-            style={{
-              border: '1px solid hsl(var(--border))',
-              color: 'hsl(var(--text-secondary))',
-            }}
+            style={{ border: '1px solid hsl(var(--border))', color: 'hsl(var(--text-secondary))' }}
           >
             <Settings size={15} />
           </Link>
@@ -109,18 +135,26 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
       {/* Task 목록 */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
           <h2 className="font-semibold" style={{ color: 'hsl(var(--text-primary))' }}>
             Tasks
+            {(searchParams.status || searchParams.priority || searchParams.search) && (
+              <span className="ml-2 text-sm font-normal" style={{ color: 'hsl(var(--text-muted))' }}>
+                ({tasks.length} / {allTasks.length})
+              </span>
+            )}
           </h2>
-          <Link
-            href={`/projects/${project.id}/tasks/new`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-white"
-            style={{ backgroundColor: 'hsl(var(--accent))' }}
-          >
-            <Plus size={15} />
-            Task 추가
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <TaskFilter />
+            <Link
+              href={`/projects/${project.id}/tasks/new`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-white shrink-0"
+              style={{ backgroundColor: 'hsl(var(--accent))' }}
+            >
+              <Plus size={15} />
+              Task 추가
+            </Link>
+          </div>
         </div>
 
         {tasks.length === 0 ? (
@@ -129,7 +163,9 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             style={{ border: '1px dashed hsl(var(--border))' }}
           >
             <p className="text-sm" style={{ color: 'hsl(var(--text-muted))' }}>
-              아직 Task가 없습니다. 첫 번째 Task를 추가하세요.
+              {allTasks.length === 0
+                ? '아직 Task가 없습니다. 첫 번째 Task를 추가하세요.'
+                : '필터 조건에 맞는 Task가 없습니다.'}
             </p>
           </div>
         ) : (
@@ -138,11 +174,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             style={{ border: '1px solid hsl(var(--border))' }}
           >
             {tasks.map((task, i) => (
-              <TaskRow
-                key={task.id}
-                task={task}
-                isLast={i === tasks.length - 1}
-              />
+              <TaskRow key={task.id} task={task} isLast={i === tasks.length - 1} />
             ))}
           </div>
         )}

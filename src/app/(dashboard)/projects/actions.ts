@@ -24,7 +24,14 @@ async function getOrCreateWorkspace(supabase: Awaited<ReturnType<typeof createCl
     .select('id')
     .single()
 
-  return workspace?.id
+  if (!workspace) return undefined
+
+  // 생성한 워크스페이스에 owner로 멤버 추가
+  await supabase
+    .from('workspace_members')
+    .insert({ workspace_id: workspace.id, user_id: userId, role: 'owner' })
+
+  return workspace.id
 }
 
 export async function getProjects() {
@@ -93,6 +100,20 @@ export async function createProject(formData: FormData) {
 
 export async function updateProject(id: string, formData: FormData) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: '로그인이 필요합니다.' }
+
+  // 소유권 확인: 프로젝트가 사용자의 워크스페이스 소속인지 검증
+  const { data: proj } = await supabase.from('projects').select('workspace_id').eq('id', id).single()
+  if (proj) {
+    const { data: member } = await supabase
+      .from('workspace_members')
+      .select('role')
+      .eq('workspace_id', proj.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+    if (!member) return { error: '권한이 없습니다.' }
+  }
 
   const name = formData.get('name') as string
   const description = formData.get('description') as string
@@ -122,6 +143,20 @@ export async function updateProject(id: string, formData: FormData) {
 
 export async function deleteProject(id: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: '로그인이 필요합니다.' }
+
+  // 소유권 확인
+  const { data: proj } = await supabase.from('projects').select('workspace_id').eq('id', id).single()
+  if (proj) {
+    const { data: member } = await supabase
+      .from('workspace_members')
+      .select('role')
+      .eq('workspace_id', proj.workspace_id)
+      .eq('user_id', user.id)
+      .single()
+    if (!member) return { error: '권한이 없습니다.' }
+  }
 
   const { error } = await supabase
     .from('projects')

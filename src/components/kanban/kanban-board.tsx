@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useRef, useEffect, useTransition } from 'react'
 import {
   DndContext,
   type DragEndEvent,
@@ -12,7 +12,7 @@ import {
   useSensors,
   closestCorners,
 } from '@dnd-kit/core'
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { arrayMove } from '@dnd-kit/sortable'
 import { KanbanColumn } from './kanban-column'
 import { KanbanCard } from './kanban-card'
 import { updateTaskStatus } from '@/app/(dashboard)/tasks/actions'
@@ -43,16 +43,16 @@ interface KanbanBoardProps {
 export function KanbanBoard({ columns: initialColumns, projectId }: KanbanBoardProps) {
   const [columns, setColumns] = useState(initialColumns)
   const [activeTask, setActiveTask] = useState<Task | null>(null)
+  const [, startTransition] = useTransition()
+  // FIX-03: 최신 columns 상태를 ref로 추적 (handleDragEnd 클로저 stale 방지)
+  const columnsRef = useRef(columns)
+  useEffect(() => { columnsRef.current = columns }, [columns])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
     })
   )
-
-  const findColumn = useCallback((taskId: string) => {
-    return columns.find((col) => col.tasks.some((t) => t.id === taskId))
-  }, [columns])
 
   function handleDragStart({ active }: DragStartEvent) {
     const col = columns.find((c) => c.tasks.some((t) => t.id === active.id))
@@ -118,12 +118,16 @@ export function KanbanBoard({ columns: initialColumns, projectId }: KanbanBoardP
       }
     }
 
-    // 서버에 상태 업데이트
-    const task = columns.flatMap((c) => c.tasks).find((t) => t.id === active.id)
-    if (task) {
-      const col = columns[targetColIdx !== -1 ? targetColIdx : activeColIdx]
+    // FIX-02 + FIX-03: 최신 state(ref)로 서버 업데이트, startTransition으로 에러 처리
+    const latestColumns = columnsRef.current
+    const latestActiveColIdx = latestColumns.findIndex((c) => c.tasks.some((t) => t.id === active.id))
+    const latestTargetColIdx = targetColIdx !== -1 ? targetColIdx : latestActiveColIdx
+    const col = latestColumns[latestTargetColIdx]
+    if (col) {
       const order = col.tasks.findIndex((t) => t.id === active.id)
-      updateTaskStatus(active.id as string, col.id as TaskStatus, order)
+      startTransition(async () => {
+        await updateTaskStatus(active.id as string, col.id as TaskStatus, order)
+      })
     }
   }
 
@@ -137,13 +141,7 @@ export function KanbanBoard({ columns: initialColumns, projectId }: KanbanBoardP
     >
       <div className="flex gap-4 h-full pb-4" style={{ minWidth: 'max-content' }}>
         {columns.map((col) => (
-          <SortableContext
-            key={col.id}
-            items={col.tasks.map((t) => t.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <KanbanColumn column={col} projectId={projectId} />
-          </SortableContext>
+          <KanbanColumn key={col.id} column={col} projectId={projectId} />
         ))}
       </div>
 

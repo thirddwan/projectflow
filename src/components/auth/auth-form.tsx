@@ -9,6 +9,7 @@ interface AuthFormProps {
   mode: AuthMode
   action: (formData: FormData) => Promise<{ error: string } | void>
   submitLabel: string
+  redirectTo?: string
 }
 
 const initialState = { error: '' }
@@ -27,7 +28,7 @@ function SubmitButton({ label }: { label: string }) {
   )
 }
 
-export function AuthForm({ mode, action, submitLabel }: AuthFormProps) {
+export function AuthForm({ mode, action, submitLabel, redirectTo }: AuthFormProps) {
   const [state, formAction] = useFormState(
     async (_: typeof initialState, formData: FormData) => {
       const result = await action(formData)
@@ -58,6 +59,7 @@ export function AuthForm({ mode, action, submitLabel }: AuthFormProps) {
       )}
 
       <form action={formAction} className="space-y-4">
+        {redirectTo && <input type="hidden" name="redirect" value={redirectTo} />}
         {/* 이름 (회원가입만) */}
         {mode === 'register' && (
           <div className="space-y-1">

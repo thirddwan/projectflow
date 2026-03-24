@@ -26,7 +26,7 @@ export interface WorkspaceMember {
   workspace_id: string
   user_id: string
   role: WorkspaceMemberRole
-  invited_at: string
+  invited_at?: string
   joined_at?: string
   user?: User
 }
